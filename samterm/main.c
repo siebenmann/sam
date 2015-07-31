@@ -484,8 +484,8 @@ type(Flayer *l, int res)	/* what a bloody mess this is */
 		if(res == RKeyboard){
 			if(c == UPKEY || c==SCROLLKEY || c==ESC)
 				break;
-			/* backspace, ctrl-u, ctrl-w, del */
-			if(c=='\b' || c==0x15 || c==0x17 || c==0x7F){
+			/* backspace, ctrl-u, ctrl-w, del, ctrl-x */
+			if(c=='\b' || c==0x15 || c==0x17 || c==0x7F || c==0x18){
 				backspacing = 1;
 				break;
 			}
@@ -524,6 +524,7 @@ type(Flayer *l, int res)	/* what a bloody mess this is */
 			case 0x7F:	/* del */
 				l->p0 = a-1;
 				break;
+			case 0x18:	/* ctrl-x */
 			case 0x15:	/* ctrl-u */
 				l->p0 = ctlu(&t->rasp, l->origin, a);
 				break;
