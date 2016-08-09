@@ -24,6 +24,39 @@ char	hasunlocked = 0;
 int	chord = 0;
 char *machine = "localhost";
 
+/* TODO: format better */
+extern void hmoveto();
+void
+scrollone(Flayer *l, int but){
+	Text *t=(Text *)l->user1;
+	long tot = scrtotal(l);
+	long p0, p1;
+
+	if (but == 1) {
+		/* Scroll backwards one line by moving to a point where
+		   a character one before the start character is displayed.
+		   Note that this is an asynchronous operation; we send a
+		   message to sam to ask it to work out the position, and
+		   it sends us back a reposition message.
+		*/
+		if (l->origin > 0)
+			hmoveto(t->tag, l->origin - 1);
+	}else if(but == 3) {
+		/* Scroll forwards one line by setting the origin to one
+		   line beyond the current origin, using the font height.
+		   We only scroll if the new position is before the last
+		   character, so the last line is always visible on screen.
+		   Also: we stop scrolling up once the end of the file is
+		   visible on the screen (this is the p1 check). <cks> may
+		   reconsider this at some point.
+		*/
+		p0 = l->origin + frcharofpt(&l->f, Pt(l->f.r.min.x, l->f.r.min.y + l->f.fheight));
+		p1 = l->origin + frcharofpt(&l->f, Pt(l->f.r.min.x, l->f.r.max.y - l->f.fheight/2));
+		if (p0 < tot && p1 < tot)
+			horigin(t->tag, p0);
+	}
+}
+
 void
 main(int argc, char *argv[])
 {
@@ -115,6 +148,10 @@ main(int argc, char *argv[])
 					scroll(which, 3, fwdbut == 3 ? 3 : 1);
 				else
 					menu3hit();
+			}else if((mouse.buttons&8)){
+				scrollone(which, 1);
+			}else if((mouse.buttons&16)){
+				scrollone(which, 3);
 			}
 			mouseunblock();
 		}
@@ -134,7 +171,6 @@ main(int argc, char *argv[])
 		}
 	}
 }
-
 
 void
 reshape(void){
