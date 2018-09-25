@@ -997,23 +997,6 @@ type(Flayer *l)    /* what a bloody mess this is -- but it's getting better! */
             break;
     }
 
-    if (k.k == Kcommand){
-        flushtyping(false);
-        if (k.c < 0 || k.c >= Cmax || commands[k.c].f == NULL)
-            panic("command table miss");
-
-        CommandEntry *e = &commands[k.c];
-        if (!e->unlocked || !lock){
-            if (k.t == Tcurrent)
-                a = e->f(l, a, t, k.a);
-            else{
-                Flayer *lt = flwhich(k.p);
-                if (lt)
-                    lt->p0 = e->f(lt, lt->p0, (Text *)lt->user1, k.a);
-            }
-        }
-    }
-
     if (p > buf){
         if (typestart < 0)
             typestart = a;
@@ -1033,6 +1016,23 @@ type(Flayer *l)    /* what a bloody mess this is -- but it's getting better! */
         if (k.c == '\n' || typeend - typestart > 100)
             flushtyping(false);
         onethird(l, a);
+    }
+
+    if (k.k == Kcommand){
+        flushtyping(false);
+        if (k.c < 0 || k.c >= Cmax || commands[k.c].f == NULL)
+            panic("command table miss");
+
+        CommandEntry *e = &commands[k.c];
+        if (!e->unlocked || !lock){
+            if (k.t == Tcurrent)
+                a = e->f(l, a, t, k.a);
+            else{
+                Flayer *lt = flwhich(k.p);
+                if (lt)
+                    lt->p0 = e->f(lt, lt->p0, (Text *)lt->user1, k.a);
+            }
+        }
     }
 
     if (typeesc >= l->p0)
